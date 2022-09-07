@@ -24,7 +24,6 @@ from pysnmp.hlapi import *
 from fpdf import FPDF
 import json
 
-
 SNMP_V1 = 0
 SNMP_V2 = 1
 JSON_INICIAL = """
@@ -34,6 +33,9 @@ JSON_INICIAL = """
     ]
 }
 """
+informacion_reporte = ["1. Sistema Operativo\n", "2. Nombre del dispositivo\n", "3. Informacion de contacto\n",
+                       "4. Ubicacion\n", "5. numero de interfaces", "6. estado administrativo de interfaces (tabla)"]
+
 diccionario_dispositivos = {}
 
 
@@ -41,16 +43,16 @@ diccionario_dispositivos = {}
 # imprimir_get('comunidadASR', SNMP_V2, 'localhost', 161)
 
 
-def imprimir_get(comunidad, version_snmp, ip, puerto):
+def snmpget(comunidad, version_snmp, ip, puerto):
     iterator = getCmd(
         SnmpEngine(),
         CommunityData(comunidad, mpModel=version_snmp),
         UdpTransportTarget((ip, puerto)),
         ContextData(),
-        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.1.0')),
-        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.2.0')),
-        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.3.0')),
-        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.4.0')),
+        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.1.0')),  # sistema operativo
+        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.5.0')),  # nombre del dispositivo
+        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.4.0')),  # informacion de contacto
+        ObjectType(ObjectIdentity('1.3.6.1.2.1.1.6.0')),  # ubicacion
     )
 
     errorIndication, errorStatus, errorIndex, varBinds = next(iterator)
@@ -65,6 +67,7 @@ def imprimir_get(comunidad, version_snmp, ip, puerto):
     else:
         for varBind in varBinds:
             print(' = '.join([x.prettyPrint() for x in varBind]))
+        return varBinds
 
 
 def inicializar():
@@ -141,23 +144,23 @@ def listar_dispositivos():
     for dispositivo, i in enumerate(diccionario_dispositivos["dispositivos"]):
         print(dispositivo, i)
 
+
 def generar_pdf():
-    #obtenemos la informacion del dispositivo del cual se generará el reporte
+    # obtenemos la informacion del dispositivo del cual se generará el reporte
     listar_dispositivos()
     dispositivo_elegido = int(input("Selecciona el dispositivo del cual se genere el reporte: "))
 
     print(diccionario_dispositivos["dispositivos"][dispositivo_elegido])
     dispositivo = diccionario_dispositivos["dispositivos"][dispositivo_elegido]
 
-    imprimir_get(dispositivo["comunidad"], dispositivo["versionSNMP"], dispositivo["ip"], dispositivo["puerto"])
-
+    datos = snmpget(dispositivo["comunidad"], dispositivo["versionSNMP"], dispositivo["ip"], dispositivo["puerto"])
 
     pdf = FPDF()
 
-    #añadir una pagina
+    # añadir una pagina
     pdf.add_page()
 
-    #encabezado (Datos personales)
+    # encabezado (Datos personales)
     pdf.set_font("Arial", size=20)
     pdf.cell(200, 10, txt="Administración de Servicios en Red",
              ln=1, align='C')
@@ -168,13 +171,23 @@ def generar_pdf():
     pdf.cell(200, 10, txt="Caleb Salomón Bolaños Ramos - grupo - boleta",
              ln=2, align='C')
 
-    #sistema operativo
-    #nombre del dispositivo
-    #informacion de contacto
-    #ubicacion
-    #numero de interfaces
-    #estado administrativo de interfaces (tabla)
 
+    i = 0
+    for contenido in datos:
+        pdf.set_font("Arial", 'B', size=12)
+        pdf.multi_cell(200, 10, txt=informacion_reporte[i], align='L')
+        pdf.set_font("Arial", size=12)
+        pdf.multi_cell(200, 7, txt=' = '.join([x.prettyPrint() for x in contenido]),
+                align='L')
+        pdf.multi_cell(200, 5, txt='', align='L')
+        i = i+1
+
+    # sistema operativo 3.6.1.2.1.1.1.0
+    # nombre del dispositivo 3.6.1.2.1.1.5.0
+    # informacion de contacto 3.6.1.2.1.1.4.0
+    # ubicacion 3.6.1.2.1.1.6.0
+    # numero de interfaces
+    # estado administrativo de interfaces (tabla)
 
     pdf.output("prueba.pdf")
 
