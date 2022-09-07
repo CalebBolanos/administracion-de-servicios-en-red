@@ -25,6 +25,18 @@ import json
 
 SNMP_V1 = 0
 SNMP_V2 = 1
+JSON_INICIAL = """
+{
+    "dispositivos": [
+
+    ]
+}
+"""
+diccionario_dispositivos = {}
+
+
+# imprimir_get('comunidadASRWin', SNMP_V1, '192.168.72.199', 161)
+# imprimir_get('comunidadASR', SNMP_V2, 'localhost', 161)
 
 
 def imprimir_get(comunidad, version_snmp, ip, puerto):
@@ -53,19 +65,106 @@ def imprimir_get(comunidad, version_snmp, ip, puerto):
             print(' = '.join([x.prettyPrint() for x in varBind]))
 
 
-print('Prueba :0')
-imprimir_get('comunidadASRWin', SNMP_V1, '192.168.72.199', 161)
-print('Linux')
-imprimir_get('comunidadASR', SNMP_V2, 'localhost', 161)
+def inicializar():
+    global diccionario_dispositivos
 
-prueba_json = {
-    "comunidad": "comunidadASRWin",
-    "versionSNMP": 0,
-    "ip": "192.168.72.199",
-    "puerto": 161
-}
+    try:
+        with open("dispositivos.json", "r") as archivo:
+            diccionario_dispositivos = json.load(archivo)
 
-prueba_json["versionSNMP"] = SNMP_V2
+    except IOError:
+        print('Archivo dispositivos.json no encontrado, se creara uno nuevo.')
+        diccionario_dispositivos = json.loads(JSON_INICIAL)
 
-print(prueba_json)
-print(prueba_json['puerto'])
+
+def guardar_cambios():
+    with open('dispositivos.json', 'w') as archivo:
+        json.dump(diccionario_dispositivos, archivo, indent=4)
+    print("Información actualizada")
+
+
+def imprimir_menu():
+    print("\nMenu principal:")
+    print("1. Agregar dispositivo")
+    print("2. Editar información de dispositivo")
+    print("3. Eliminar dispositivo")
+    print("4. Listar dispositivos existentes")
+    print("5. Generar reporte")
+    print("6. Salir")
+
+
+def agregar_dispositivo():
+    print("Agregar dispositivo")
+    comunidad = input("Escribe el nombre de la comunidad del dispositivo: ")
+    version = int(input("Digita la version SNMP del dispositivo v1(0), v2c(1): "))
+    puerto = int(input("Escribe el puerto del dispositivo: "))
+    ip = input("Escribe la direccion ip del dispositivo: ")
+    diccionario_dispositivos["dispositivos"].append(
+        {'comunidad': comunidad, 'versionSNMP': version, 'ip': ip, 'puerto': puerto})
+    guardar_cambios()
+
+
+def editar_dispositivo():
+    listar_dispositivos()
+    dispositivo_elegido = int(input("Selecciona el dispositivo a editar: "))
+
+    diccionario_dispositivos["dispositivos"][dispositivo_elegido]["comunidad"] = input(
+        "Escribe el nuevo nombre de la comunidad del dispositivo: ")
+    diccionario_dispositivos["dispositivos"][dispositivo_elegido]["versionSNMP"] = int(
+        input("Digita la version SNMP del dispositivo v1(0), v2c(1): "))
+    diccionario_dispositivos["dispositivos"][dispositivo_elegido]["ip"] = int(
+        input("Escribe el puerto del dispositivo: "))
+    diccionario_dispositivos["dispositivos"][dispositivo_elegido]["puerto"] = input(
+        "Escribe la nueva direccion ip del dispositivo: ")
+
+    guardar_cambios()
+
+
+def eliminar_dispositivo():
+    listar_dispositivos()
+    dispositivo_elegido = int(input("Selecciona el dispositivo a eliminar: "))
+
+    print(diccionario_dispositivos["dispositivos"][dispositivo_elegido])
+    str_borrar = input("Estas seguro que quieres eliminar el sigiente dispositivo? s/n")
+
+    if str_borrar == "s":
+        del diccionario_dispositivos["dispositivos"][dispositivo_elegido]
+        print("dispositivo eliminado")
+        guardar_cambios()
+    else:
+        print("No se ha eliminado el dispositivo")
+
+
+def listar_dispositivos():
+    for dispositivo, i in enumerate(diccionario_dispositivos["dispositivos"]):
+        print(dispositivo, i)
+
+
+inicializar()
+print("Practica 1 - Adquisición de información")
+print("Caleb Salomón Bolaños Ramos - grupo - boleta\n")
+
+while True:
+    imprimir_menu()
+    opcion = ''
+    try:
+        opcion = int(input('\nIngresa una opción: '))
+    except:
+        print('Ingresa un número')
+
+    if opcion == 1:
+        agregar_dispositivo()
+    elif opcion == 2:
+        editar_dispositivo()
+    elif opcion == 3:
+        eliminar_dispositivo()
+    elif opcion == 4:
+        print("Todos los dispositivos disponibles:")
+        listar_dispositivos()
+    elif opcion == 5:
+        print('Opcion 5')
+    elif opcion == 6:
+        print('Adios! :)')
+        exit()
+    else:
+        print('Opcion invalida. Introduce un número del 1 al 6.')

@@ -1,0 +1,16 @@
+{
+    "dispositivos": [
+        {
+            "comunidad": "comunidadASRWin",
+            "versionSNMP": 0,
+            "ip": "192.168.72.199",
+            "puerto": 161
+        },
+        {
+            "comunidad": "comunidadASR",
+            "versionSNMP": 1,
+            "ip": "localhost",
+            "puerto": 161
+        }
+    ]
+}
