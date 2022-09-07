@@ -21,7 +21,9 @@ ip asignada por celular: '192.168.72.199'
 
 """  #
 from pysnmp.hlapi import *
+from fpdf import FPDF
 import json
+
 
 SNMP_V1 = 0
 SNMP_V2 = 1
@@ -139,6 +141,43 @@ def listar_dispositivos():
     for dispositivo, i in enumerate(diccionario_dispositivos["dispositivos"]):
         print(dispositivo, i)
 
+def generar_pdf():
+    #obtenemos la informacion del dispositivo del cual se generará el reporte
+    listar_dispositivos()
+    dispositivo_elegido = int(input("Selecciona el dispositivo del cual se genere el reporte: "))
+
+    print(diccionario_dispositivos["dispositivos"][dispositivo_elegido])
+    dispositivo = diccionario_dispositivos["dispositivos"][dispositivo_elegido]
+
+    imprimir_get(dispositivo["comunidad"], dispositivo["versionSNMP"], dispositivo["ip"], dispositivo["puerto"])
+
+
+    pdf = FPDF()
+
+    #añadir una pagina
+    pdf.add_page()
+
+    #encabezado (Datos personales)
+    pdf.set_font("Arial", size=20)
+    pdf.cell(200, 10, txt="Administración de Servicios en Red",
+             ln=1, align='C')
+    pdf.set_font("Arial", 'I', size=20)
+    pdf.cell(200, 10, txt="Practica 1 - Adquisición de información",
+             ln=2, align='C')
+    pdf.set_font("Arial", 'B', size=20)
+    pdf.cell(200, 10, txt="Caleb Salomón Bolaños Ramos - grupo - boleta",
+             ln=2, align='C')
+
+    #sistema operativo
+    #nombre del dispositivo
+    #informacion de contacto
+    #ubicacion
+    #numero de interfaces
+    #estado administrativo de interfaces (tabla)
+
+
+    pdf.output("prueba.pdf")
+
 
 inicializar()
 print("Practica 1 - Adquisición de información")
@@ -162,7 +201,7 @@ while True:
         print("Todos los dispositivos disponibles:")
         listar_dispositivos()
     elif opcion == 5:
-        print('Opcion 5')
+        generar_pdf()
     elif opcion == 6:
         print('Adios! :)')
         exit()
