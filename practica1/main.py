@@ -26,6 +26,11 @@ import json
 
 SNMP_V1 = 0
 SNMP_V2 = 1
+estado_interfaz = {
+    "1": "up",
+    "2": "down",
+    "3": "testing"
+}
 JSON_INICIAL = """
 {
     "dispositivos": [
@@ -34,7 +39,7 @@ JSON_INICIAL = """
 }
 """
 informacion_reporte = ["1. Sistema Operativo\n", "2. Nombre del dispositivo\n", "3. Informacion de contacto\n",
-                       "4. Ubicacion\n", "5. Numero de interfaces", "6. Estado administrativo de interfaces (tabla)"]
+                       "4. Ubicacion\n", "5. Numero de interfaces", "6. Estado administrativo de interfaces (Interfaz - Estado)"]
 
 diccionario_dispositivos = {}
 
@@ -72,11 +77,11 @@ def snmpget(dispositivo):
 
 
 def obtener_informacion_interfaces(dispositivo, numero_interfaces):
-    tabla_interfaces = []
+    lista_interfaces = []
     oids = []
     for i in range(1, numero_interfaces+1):
         oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.2.' + str(i)))) #nombre de interfaz
-        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.8.'+str(i)))) #estado
+        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.8.' + str(i)))) #estado
 
     iterator = getCmd(
         SnmpEngine(),#numero_interfaces
@@ -97,7 +102,13 @@ def obtener_informacion_interfaces(dispositivo, numero_interfaces):
 
     else:
         for oid, val in varBinds:
-            tabla_interfaces.append(val.prettyPrint())
+            if val.prettyPrint().startswith('0x'):
+                lista_interfaces.append(bytes.fromhex(val.prettyPrint()[2:]).decode('utf-8'))
+            else:
+                lista_interfaces.append(val.prettyPrint())
+
+    it = iter(lista_interfaces)
+    tabla_interfaces = dict(zip(it, it))
     return tabla_interfaces
 
 
@@ -185,7 +196,9 @@ def generar_pdf():
     dispositivo = diccionario_dispositivos["dispositivos"][dispositivo_elegido]
 
     datos_dispositivo = snmpget(dispositivo)
-    tabla_interfaces = obtener_informacion_interfaces(dispositivo, 2)
+
+    numero_interfaces = int(datos_dispositivo[4][1]) if int(datos_dispositivo[4][1]) <= 5 else 5
+    tabla_interfaces = obtener_informacion_interfaces(dispositivo, numero_interfaces)
 
     pdf = FPDF()
 
@@ -200,7 +213,7 @@ def generar_pdf():
     pdf.cell(200, 10, txt="Practica 1 - Adquisición de información",
              ln=2, align='C')
     pdf.set_font("Arial", 'B', size=20)
-    pdf.cell(200, 10, txt="Caleb Salomón Bolaños Ramos - grupo - boleta",
+    pdf.cell(200, 10, txt="Caleb Salomón Bolaños Ramos - 4CM13 - 2020630043",
              ln=2, align='C')
 
     i = 0
@@ -210,7 +223,6 @@ def generar_pdf():
 
         pdf.set_font("Arial", size=12)
         contenido_texto = ' = '.join([x.prettyPrint() for x in contenido])
-
 
         if i == 0:
             pdf.multi_cell(150, 7, txt=contenido_texto, align='L')
@@ -226,7 +238,12 @@ def generar_pdf():
     pdf.multi_cell(200, 10, txt=informacion_reporte[5], align='L')
     print(tabla_interfaces)
 
-    pdf.output("prueba.pdf")
+    pdf.set_font("Arial", size=12)
+    for interfaz, estado in tabla_interfaces.items():
+        print(interfaz, estado)
+        pdf.multi_cell(190, 7, txt="-" + interfaz + ": " + estado_interfaz.get(estado, "Desconocido") + " (" + estado + ")", align='L')
+
+    pdf.output("reporte_"+dispositivo["ip"]+"_"+dispositivo["comunidad"]+".pdf")
 
 
 def obtener_imagen_os(string):
@@ -245,7 +262,7 @@ def obtener_imagen_os(string):
 
 inicializar()
 print("Practica 1 - Adquisición de información")
-print("Caleb Salomón Bolaños Ramos - grupo - boleta\n")
+print("Caleb Salomón Bolaños Ramos - 4CM13 - 2020630043\n")
 
 while True:
     imprimir_menu()
