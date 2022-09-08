@@ -34,7 +34,7 @@ JSON_INICIAL = """
 }
 """
 informacion_reporte = ["1. Sistema Operativo\n", "2. Nombre del dispositivo\n", "3. Informacion de contacto\n",
-                       "4. Ubicacion\n", "5. numero de interfaces", "6. estado administrativo de interfaces (tabla)"]
+                       "4. Ubicacion\n", "5. Numero de interfaces", "6. Estado administrativo de interfaces (tabla)"]
 
 diccionario_dispositivos = {}
 
@@ -43,16 +43,17 @@ diccionario_dispositivos = {}
 # imprimir_get('comunidadASR', SNMP_V2, 'localhost', 161)
 
 
-def snmpget(comunidad, version_snmp, ip, puerto):
+def snmpget(dispositivo):
     iterator = getCmd(
         SnmpEngine(),
-        CommunityData(comunidad, mpModel=version_snmp),
-        UdpTransportTarget((ip, puerto)),
+        CommunityData(dispositivo["comunidad"], mpModel=dispositivo["versionSNMP"]),
+        UdpTransportTarget((dispositivo["ip"], dispositivo["puerto"])),
         ContextData(),
         ObjectType(ObjectIdentity('1.3.6.1.2.1.1.1.0')),  # sistema operativo
         ObjectType(ObjectIdentity('1.3.6.1.2.1.1.5.0')),  # nombre del dispositivo
         ObjectType(ObjectIdentity('1.3.6.1.2.1.1.4.0')),  # informacion de contacto
         ObjectType(ObjectIdentity('1.3.6.1.2.1.1.6.0')),  # ubicacion
+        ObjectType(ObjectIdentity('1.3.6.1.2.1.2.1.0')),  # numero de interfaces
     )
 
     errorIndication, errorStatus, errorIndex, varBinds = next(iterator)
@@ -68,6 +69,36 @@ def snmpget(comunidad, version_snmp, ip, puerto):
         for varBind in varBinds:
             print(' = '.join([x.prettyPrint() for x in varBind]))
         return varBinds
+
+
+def obtener_informacion_interfaces(dispositivo, numero_interfaces):
+    tabla_interfaces = []
+    oids = []
+    for i in range(1, numero_interfaces+1):
+        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.2.' + str(i)))) #nombre de interfaz
+        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.8.'+str(i)))) #estado
+
+    iterator = getCmd(
+        SnmpEngine(),#numero_interfaces
+        CommunityData(dispositivo["comunidad"], mpModel=dispositivo["versionSNMP"]),
+        UdpTransportTarget((dispositivo["ip"], dispositivo["puerto"])),
+        ContextData(),
+        *oids,
+    )
+
+    errorIndication, errorStatus, errorIndex, varBinds = next(iterator)
+
+    if errorIndication:
+        print(errorIndication)
+
+    elif errorStatus:
+        print('%s at %s' % (errorStatus.prettyPrint(),
+                            errorIndex and varBinds[int(errorIndex) - 1][0] or '?'))
+
+    else:
+        for oid, val in varBinds:
+            tabla_interfaces.append(val.prettyPrint())
+    return tabla_interfaces
 
 
 def inicializar():
@@ -153,7 +184,8 @@ def generar_pdf():
     print(diccionario_dispositivos["dispositivos"][dispositivo_elegido])
     dispositivo = diccionario_dispositivos["dispositivos"][dispositivo_elegido]
 
-    datos = snmpget(dispositivo["comunidad"], dispositivo["versionSNMP"], dispositivo["ip"], dispositivo["puerto"])
+    datos_dispositivo = snmpget(dispositivo)
+    tabla_interfaces = obtener_informacion_interfaces(dispositivo, 2)
 
     pdf = FPDF()
 
@@ -171,25 +203,44 @@ def generar_pdf():
     pdf.cell(200, 10, txt="Caleb Salomón Bolaños Ramos - grupo - boleta",
              ln=2, align='C')
 
-
     i = 0
-    for contenido in datos:
+    for contenido in datos_dispositivo:
         pdf.set_font("Arial", 'B', size=12)
         pdf.multi_cell(200, 10, txt=informacion_reporte[i], align='L')
+
         pdf.set_font("Arial", size=12)
-        pdf.multi_cell(200, 7, txt=' = '.join([x.prettyPrint() for x in contenido]),
-                align='L')
+        contenido_texto = ' = '.join([x.prettyPrint() for x in contenido])
+
+
+        if i == 0:
+            pdf.multi_cell(150, 7, txt=contenido_texto, align='L')
+            pdf.image(obtener_imagen_os(contenido_texto), x=170, y=40, w=25, h=25, type='PNG')
+        else:
+            pdf.multi_cell(200, 7, txt=contenido_texto, align='L')
+
         pdf.multi_cell(200, 5, txt='', align='L')
         i = i+1
 
-    # sistema operativo 3.6.1.2.1.1.1.0
-    # nombre del dispositivo 3.6.1.2.1.1.5.0
-    # informacion de contacto 3.6.1.2.1.1.4.0
-    # ubicacion 3.6.1.2.1.1.6.0
-    # numero de interfaces
     # estado administrativo de interfaces (tabla)
+    pdf.set_font("Arial", 'B', size=12)
+    pdf.multi_cell(200, 10, txt=informacion_reporte[5], align='L')
+    print(tabla_interfaces)
 
     pdf.output("prueba.pdf")
+
+
+def obtener_imagen_os(string):
+    if string is None:
+        return ""
+
+    if "Ubuntu" in string:
+        return "https://cdn-icons-png.flaticon.com/512/888/888879.png"
+    elif "Linux" in string:
+        return "https://www.redhat.com/cms/managed-files/tux-327x360.png"
+    elif "Windows" in string:
+        return "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Windows_logo_-_2012.png/800px-Windows_logo_-_2012.png"
+    else:
+        return ""
 
 
 inicializar()
