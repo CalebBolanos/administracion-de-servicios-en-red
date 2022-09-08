@@ -37,7 +37,8 @@ JSON_INICIAL = """
 }
 """
 informacion_reporte = ["1. Sistema Operativo\n", "2. Nombre del dispositivo\n", "3. Informacion de contacto\n",
-                       "4. Ubicacion\n", "5. Numero de interfaces", "6. Estado administrativo de interfaces (Interfaz - Estado)"]
+                       "4. Ubicacion\n", "5. Numero de interfaces",
+                       "6. Estado administrativo de interfaces (Interfaz - Estado)"]
 # contiene todos los dispositivos guardados por el usuario
 diccionario_dispositivos = {}
 
@@ -87,9 +88,9 @@ def obtener_informacion_interfaces(dispositivo, numero_interfaces):
     oids = []
 
     # se generan los oids necesarios en funcion del numero de interfaces que tiene el dispositivo
-    for i in range(1, numero_interfaces+1):
-        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.2.' + str(i)))) # nombre de interfaz
-        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.8.' + str(i)))) # estado
+    for i in range(1, numero_interfaces + 1):
+        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.2.' + str(i))))  # nombre de interfaz
+        oids.append(ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2.1.8.' + str(i))))  # estado
 
     iterator = getCmd(
         SnmpEngine(),
@@ -110,7 +111,7 @@ def obtener_informacion_interfaces(dispositivo, numero_interfaces):
 
     else:
         for oid, val in varBinds:
-            if val.prettyPrint().startswith('0x'): # si la respuesta es un hexadecimal, esta se decodifica en utf-8
+            if val.prettyPrint().startswith('0x'):  # si la respuesta es un hexadecimal, esta se decodifica en utf-8
                 lista_interfaces.append(bytes.fromhex(val.prettyPrint()[2:]).decode('utf-8'))
             else:
                 lista_interfaces.append(val.prettyPrint())
@@ -211,9 +212,9 @@ def eliminar_dispositivo():
     str_borrar = input("\nEstas seguro que quieres eliminar el sigiente dispositivo? s/n: ")
 
     if str_borrar == "s":
-        if os.path.exists("reporte_"+dispositivo_a_borrar["ip"]+"_"+dispositivo_a_borrar["comunidad"]+".pdf"):
-            os.remove("reporte_"+dispositivo_a_borrar["ip"]+"_"+dispositivo_a_borrar["comunidad"]+".pdf")
-            print("reporte_"+dispositivo_a_borrar["ip"]+"_"+dispositivo_a_borrar["comunidad"]+".pdf eliminado")
+        if os.path.exists("reporte_" + dispositivo_a_borrar["ip"] + "_" + dispositivo_a_borrar["comunidad"] + ".pdf"):
+            os.remove("reporte_" + dispositivo_a_borrar["ip"] + "_" + dispositivo_a_borrar["comunidad"] + ".pdf")
+            print("reporte_" + dispositivo_a_borrar["ip"] + "_" + dispositivo_a_borrar["comunidad"] + ".pdf eliminado")
 
         del diccionario_dispositivos["dispositivos"][dispositivo_elegido]
 
@@ -251,11 +252,12 @@ def generar_pdf():
 
     # obtenemos la informacion del dispositivo del cual se generará el reporte
     datos_dispositivo = snmpget(dispositivo)
-
+    # si el dispositivo cuenta con mas de 5 interfaces se limita la consulta para solo mostrar las primeras 5
+    # interfaces en el reporte
     numero_interfaces = int(datos_dispositivo[4][1]) if int(datos_dispositivo[4][1]) <= 5 else 5
     tabla_interfaces = obtener_informacion_interfaces(dispositivo, numero_interfaces)
 
-    print("Creando reporte del dispositivo (reporte_"+dispositivo["ip"]+"_"+dispositivo["comunidad"]+".pdf)")
+    print("Creando reporte del dispositivo (reporte_" + dispositivo["ip"] + "_" + dispositivo["comunidad"] + ".pdf)")
 
     pdf = FPDF()
     pdf.add_page()
@@ -287,7 +289,7 @@ def generar_pdf():
             pdf.multi_cell(200, 7, txt=contenido_texto, align='L')
 
         pdf.multi_cell(200, 5, txt='', align='L')
-        i = i+1
+        i = i + 1
 
     # parte de estado administrativo de interfaces
     pdf.set_font("Arial", 'B', size=12)
@@ -295,11 +297,13 @@ def generar_pdf():
 
     pdf.set_font("Arial", size=12)
     for interfaz, estado in tabla_interfaces.items():
-        pdf.multi_cell(190, 7, txt="-" + interfaz + ": " + estado_interfaz.get(estado, "Desconocido") + " (" + estado + ")", align='L')
+        pdf.multi_cell(190, 7,
+                       txt="-" + interfaz + ": " + estado_interfaz.get(estado, "Desconocido") + " (" + estado + ")",
+                       align='L')
 
-    #se genera el pdf utilizando como nombre la ip y comunidad del dispositivo
-    pdf.output("reporte_"+dispositivo["ip"]+"_"+dispositivo["comunidad"]+".pdf")
-    print("reporte_"+dispositivo["ip"]+"_"+dispositivo["comunidad"]+".pdf creado correctamente")
+    # se genera el pdf utilizando como nombre la ip y comunidad del dispositivo
+    pdf.output("reporte_" + dispositivo["ip"] + "_" + dispositivo["comunidad"] + ".pdf")
+    print("reporte_" + dispositivo["ip"] + "_" + dispositivo["comunidad"] + ".pdf creado correctamente")
 
 
 def obtener_imagen_os(string):
