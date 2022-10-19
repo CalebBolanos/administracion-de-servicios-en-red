@@ -11,6 +11,12 @@
             "versionSNMP": 0,
             "ip": "192.168.1.87",
             "puerto": 161
+        },
+        {
+            "comunidad": "comunidadCaleb",
+            "versionSNMP": 0,
+            "ip": "192.168.214.189",
+            "puerto": 161
         }
     ]
 }
