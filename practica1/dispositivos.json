@@ -17,6 +17,12 @@
             "versionSNMP": 0,
             "ip": "192.168.214.189",
             "puerto": 161
+        },
+        {
+            "comunidad": "comunidadASR",
+            "versionSNMP": 0,
+            "ip": "192.168.1.65",
+            "puerto": 161
         }
     ]
 }
