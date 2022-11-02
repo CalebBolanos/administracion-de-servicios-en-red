@@ -8,6 +8,20 @@ Caleb Salomón Bolaños Ramos - 4CM13 - 2020630043
 
 import rrdtool
 from pysnmp.hlapi import *
+from datetime import date
+
+
+fecha_nacimiento = date(2001, 2, 11)
+fecha_actual = date(2022, 10, 27)
+
+delta = fecha_actual - fecha_nacimiento
+dias_vividos = delta.days
+print(dias_vividos)
+
+bloque_ejercicios = (dias_vividos % 3)+1
+
+print(bloque_ejercicios)
+
 
 ret = rrdtool.create("test.rrd",
                      #step:60,
@@ -32,3 +46,4 @@ gra= rrdtool.graph("speed.png",
                    "--end", "920808000",
                    "DEF:myspeed=test.rrd:speed:AVERAGE",
                    "LINE1:myspeed#FF0000")
+
