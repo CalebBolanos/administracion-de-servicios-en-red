@@ -11,16 +11,19 @@ from pysnmp.hlapi import *
 from datetime import date
 
 
-fecha_nacimiento = date(2001, 2, 11)
-fecha_actual = date(2022, 10, 27)
+def calcular_bloque_ejercicio(fecha_nacimiento):
+    fecha_actual = date(2022, 10, 27)
 
-delta = fecha_actual - fecha_nacimiento
-dias_vividos = delta.days
-print(dias_vividos)
+    delta = fecha_actual - fecha_nacimiento
+    dias_vividos = delta.days
+    print(dias_vividos)
 
-bloque_ejercicios = (dias_vividos % 3)+1
+    bloque_ejercicios = (dias_vividos % 3) + 1
 
-print(bloque_ejercicios)
+    return bloque_ejercicios
+
+
+print(calcular_bloque_ejercicio(date(2001, 2, 11)))
 
 
 ret = rrdtool.create("test.rrd",
