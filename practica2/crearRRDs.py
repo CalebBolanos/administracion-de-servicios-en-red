@@ -10,14 +10,19 @@ atributos_contabilidad = [
     'datagramas'
 ]
 
+datasources = []
 for atributo in atributos_contabilidad:
-    rrdx = rrdtool.create("{}.rrd".format(atributo),
+    datasources.append("DS:{}:COUNTER:120:U:U".format(atributo))
+
+
+rrdx = rrdtool.create("contabilidad.rrd",
                          "--start", 'N',
                          "--step", '60',#acepta info cada 60 segundos
-                         "DS:{}:COUNTER:120:U:U".format(atributo),#nombreds:dstype:heartbeat(segundos):min:max
+                         datasources,
                          "RRA:AVERAGE:0.5:5:5",)
 
-    if rrdx:
-        print(rrdtool.error())
+if rrdx:
+    print(rrdtool.error())
 
-    # rrdtool.dump("{}.rrd".format(atributo), "{}.xml".format(atributo))
+# rrdtool.dump("contabilidad.rrd", "contabilidad.xml")
+print(datasources)

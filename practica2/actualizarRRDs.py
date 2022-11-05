@@ -14,16 +14,14 @@ atributos_contabilidad = {
 valor_datasource = 0
 
 while 1:
+    valor = "N"
     for datasource, oid in atributos_contabilidad.items():
         valor_datasource = int(snmpget('comunidadASR','localhost', oid))
 
-        valor = "N:" + str(valor_datasource)
-        print(datasource, valor)
-        rrdtool.update('{}.rrd'.format(datasource), valor)
+        valor += ":" + str(valor_datasource)
+        # print(datasource, valor)
         #rrdtool.dump('traficoRED.rrd','traficoRED.xml')
 
+    print(valor)
+    rrdtool.update('contabilidad.rrd', valor)
     time.sleep(1)
-
-if ret:
-    print (rrdtool.error())
-    time.sleep(300)
