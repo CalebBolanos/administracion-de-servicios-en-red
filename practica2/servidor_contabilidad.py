@@ -13,12 +13,12 @@ from datetime import datetime
 from operacionesSNMP import snmpget
 
 #atributos de contabilidad
-oids = {
-    'Paquetes multicast que ha enviado la interfaz de la interfaz de red de un agente': 'a',
-    'Paquetes IP que los protocolos locales (incluyendo ICMP) suministraron a IP en las solicitudes de transmisión.': 'b',
-    'Mensajes ICMP que ha recibido el agente': 'c',
-    'Número de segmentos TCP transmitidos que contienen uno o más octetos transmitidos previamente': 'd',
-    'Datagramas enviados por el dispositivo': 'e'
+atributos_contabilidad = {
+    'Paquetes multicast que ha enviado la interfaz de la interfaz de red de un agente': '1.3.6.1.2.1.2.2.1.12.1',
+    'Paquetes IP que los protocolos locales (incluyendo ICMP) suministraron a IP en las solicitudes de transmisión.': '1.3.6.1.2.1.4.10.0',
+    'Mensajes ICMP que ha recibido el agente': '1.3.6.1.2.1.5.1.0',
+    'Número de segmentos TCP transmitidos que contienen uno o más octetos transmitidos previamente': '1.3.6.1.2.1.6.12.0',
+    'Datagramas enviados por el dispositivo': '1.3.6.1.2.1.7.4.0'
 }
 
 
@@ -58,7 +58,7 @@ print("Generar reporte de bloque " + str(calcular_bloque_ejercicio(date(2001, 2,
 comunidad_agente = input("Escribe el nombre de la comunidad del Agente (Elemento de servicio): ")
 ip_agente = input("Escribe la direccion ip del Agente (Elemento de servicio): ")
 
-print(snmpget(comunidad_agente, ip_agente, "1.3.6.1.2.1.1.1.0"))
+print(snmpget(comunidad_agente, ip_agente, "1.3.6.1.2.1.6.12.0"))
 
 
 # seleccion = input('Digita el bloque del cual se generara el reporte: ')

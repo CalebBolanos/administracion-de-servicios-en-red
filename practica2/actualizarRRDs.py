@@ -1,19 +1,27 @@
 import time
 import rrdtool
 from operacionesSNMP import snmpget
-total_input_traffic = 0
-total_output_traffic = 0
+
+#por cada atributo de contabilidad crear su Data Source correspondiente
+atributos_contabilidad = {
+    'paquetes_multicast': '1.3.6.1.2.1.2.2.1.12.1',
+    'paquetes_ip': '1.3.6.1.2.1.4.10.0',
+    'mensajes_icmp': '1.3.6.1.2.1.5.1.0',
+    'segmentos_tcp': '1.3.6.1.2.1.6.12.0',
+    'datagramas': '1.3.6.1.2.1.7.4.0'
+}
+
+valor_datasource = 0
 
 while 1:
-    total_input_traffic = int(snmpget('comunidadSNMP','localhost',
-                                            '1.3.6.1.2.1.2.2.1.10.2'))
-    total_output_traffic = int(snmpget('comunidadSNMP','localhost',
-                                            '1.3.6.1.2.1.2.2.1.16.2'))
+    for datasource, oid in atributos_contabilidad.items():
+        valor_datasource = int(snmpget('comunidadASR','localhost', oid))
 
-    valor = "N:" + str(total_input_traffic) + ':' + str(total_output_traffic)
-    print (valor)
-    rrdtool.update('traficoRED.rrd', valor)
-    #rrdtool.dump('traficoRED.rrd','traficoRED.xml')
+        valor = "N:" + str(valor_datasource)
+        print(datasource, valor)
+        rrdtool.update('{}.rrd'.format(datasource), valor)
+        #rrdtool.dump('traficoRED.rrd','traficoRED.xml')
+
     time.sleep(1)
 
 if ret:
