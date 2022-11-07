@@ -12,6 +12,13 @@ atributos_contabilidad = {
 }
 
 valor_datasource = 0
+nombres_ds = ''
+for datasource, oid in atributos_contabilidad.items():
+    nombres_ds += str(datasource) + ":"
+
+nombres_ds = nombres_ds[:-1]
+
+print(nombres_ds)
 
 while 1:
     valor = "N"
@@ -24,4 +31,4 @@ while 1:
 
     print(valor)
     rrdtool.update('contabilidad.rrd', valor)
-    time.sleep(1)
+    time.sleep(1*60)

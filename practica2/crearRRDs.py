@@ -12,17 +12,17 @@ atributos_contabilidad = [
 
 datasources = []
 for atributo in atributos_contabilidad:
-    datasources.append("DS:{}:COUNTER:120:U:U".format(atributo))
+    datasources.append("DS:{}:COUNTER:300:U:U".format(atributo))
 
-
+#guarda un dia en resolucion de un minuto
 rrdx = rrdtool.create("contabilidad.rrd",
                          "--start", 'N',
                          "--step", '60',#acepta info cada 60 segundos
                          datasources,
-                         "RRA:AVERAGE:0.5:5:5",)
+                         "RRA:AVERAGE:0.5:1:1440",)
 
 if rrdx:
     print(rrdtool.error())
 
-# rrdtool.dump("contabilidad.rrd", "contabilidad.xml")
+rrdtool.dump("contabilidad.rrd", "contabilidad.xml")
 print(datasources)
