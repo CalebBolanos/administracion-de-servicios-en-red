@@ -4,7 +4,7 @@ import time
 rrdtool.dump("contabilidad.rrd", "contabilidad.xml")
 tiempo_actual = int(time.time())
 #Grafica desde el tiempo actual menos diez minutos
-tiempo_inicial = tiempo_actual - (60*10)
+tiempo_inicial = tiempo_actual - (60*20)
 
 #separar cada datasorce para hacer su propia grafica
 ret = rrdtool.graphv( "contabilidad.png",
