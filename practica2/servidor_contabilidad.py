@@ -47,6 +47,14 @@ atributos_contabilidad = {
     'datagramas': '1.3.6.1.2.1.7.4.0'
 }
 
+tupla_contabilidad = (
+    'paquetes_multicast',
+    'paquetes_ip',
+    'mensajes_icmp',
+    'segmentos_tcp',
+    'datagramas'
+)
+
 
 def inicializar_json():
     """
@@ -206,8 +214,15 @@ def generar_reporte():
     # print(str(posix_inicio)[:-2], str(posix_final)[:-2])
 
     generar_graficas_rrd(posix_inicio, posix_final, agente_seleccionado["comunidad"])
-    print(time.mktime(datetime_final.timetuple()))
+    generar_pdf(agente_seleccionado["comunidad"], posix_inicio, posix_final)
 
+
+def generar_pdf(nombre_agente, fecha_inicio, fecha_fin):
+    resultado_fetch = rrdtool.fetch("-s", fecha_inicio, "-e", fecha_fin, "contabilidad_{}.rrd".format(nombre_agente), "AVERAGE")
+    filas = resultado_fetch[2]
+    valores_contabilidad = filas.pop() #ultimo valor censado dentro del rango de la fecha indicada por el usuario
+    resultado_atributos_contabilidad = dict(zip(tupla_contabilidad, valores_contabilidad))
+    print(resultado_atributos_contabilidad)
 
 # imprimir_diccionario(oids)
 inicializar_json()
