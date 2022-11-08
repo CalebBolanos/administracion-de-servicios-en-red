@@ -26,7 +26,7 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="RunManager" selected="Python.graficarRRDs">
+  <component name="RunManager" selected="Python.servidor_contabilidad">
     <configuration name="actualizarRRDs" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="practica2" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -113,8 +113,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.graficarRRDs" />
         <item itemvalue="Python.actualizarRRDs" />
+        <item itemvalue="Python.graficarRRDs" />
         <item itemvalue="Python.crearRRDs" />
       </list>
     </recent_temporary>

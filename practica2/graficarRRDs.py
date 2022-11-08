@@ -17,7 +17,7 @@ ret = rrdtool.graphv( "contabilidad.png",
                      "DEF:traficoPaquetesIP=contabilidad.rrd:paquetes_ip:AVERAGE",
                      "LINE1:traficoPaquetesIP#f0932b:paq_ip",#paquetes_ip
                      "DEF:traficoMensajesICMP=contabilidad.rrd:mensajes_icmp:AVERAGE",
-                     "LINE1:traficoMensajesICMP#eb4d4b:men_icmp",#mensajes_icmp
+                     "LINE1:traficoMensajesICMP#eb4d4b:men_icmp",#mensajes_icmp mandar pings
                      "DEF:traficoSegmentosTCP=contabilidad.rrd:segmentos_tcp:AVERAGE",
                      "LINE1:traficoSegmentosTCP#6ab04c:seg_tcp",#segmentos_tcp
                      "DEF:traficoDatagramas=contabilidad.rrd:datagramas:AVERAGE",
