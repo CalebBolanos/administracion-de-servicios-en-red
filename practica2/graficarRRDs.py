@@ -1,25 +1,38 @@
 import sys
 import rrdtool
 import time
-rrdtool.dump("contabilidad_comunidadASR.rrd", "contabilidad_comunidadASR.xml")
-tiempo_actual = int(time.time())
-#Grafica desde el tiempo actual menos diez minutos
-tiempo_inicial = tiempo_actual - (60*20)
 
-#separar cada datasorce para hacer su propia grafica
-ret = rrdtool.graphv( "contabilidad_comunidadASR.png",
-                     "--start",str(tiempo_inicial),
-                     "--end",str(tiempo_actual),
-                     "--vertical-label=Bytes/s",
-                     "--title=Tráfico de Red de un agente \n Usando SNMP y RRDtools",
-                     "DEF:traficoPaquetesMulticast=contabilidad.rrd:paquetes_multicast:AVERAGE",
-                     "LINE1:traficoPaquetesMulticast#f9ca24:paq_multicast",#paquetes_multicast
-                     "DEF:traficoPaquetesIP=contabilidad.rrd:paquetes_ip:AVERAGE",
-                     "LINE1:traficoPaquetesIP#f0932b:paq_ip",#paquetes_ip
-                     "DEF:traficoMensajesICMP=contabilidad.rrd:mensajes_icmp:AVERAGE",
-                     "LINE1:traficoMensajesICMP#eb4d4b:men_icmp",#mensajes_icmp mandar pings
-                     "DEF:traficoSegmentosTCP=contabilidad.rrd:segmentos_tcp:AVERAGE",
-                     "LINE1:traficoSegmentosTCP#6ab04c:seg_tcp",#segmentos_tcp
-                     "DEF:traficoDatagramas=contabilidad.rrd:datagramas:AVERAGE",
-                     "LINE1:traficoDatagramas#0000FF:datagramas",#datagramas
-                     )
+strings_contabilidad = {
+    'paquetes_multicast': 'Paquetes multicast que ha enviado la interfaz de la interfaz de red de un agente',
+    'paquetes_ip': 'Paquetes IP que los protocolos locales (incluyendo ICMP) suministraron a IP en las solicitudes de transmisión.',
+    'mensajes_icmp': 'Mensajes ICMP que ha recibido el agente',
+    'segmentos_tcp': 'Número de segmentos TCP transmitidos que contienen uno o más octetos transmitidos previamente',
+    'datagramas': 'Datagramas enviados por el dispositivo',
+}
+
+
+def generar_graficas_rrd(inicio, fin, nombre):
+
+    rrdtool.dump("contabilidad_{}.rrd".format(nombre), "contabilidad_{}.xml".format(nombre))
+
+    #separar cada datasorce para hacer su propia grafica
+    for datasource, titulo in strings_contabilidad.items():
+        ret = rrdtool.graphv( "{}_{}.png".format(nombre, datasource),
+                             "--start",inicio,
+                             "--end",fin,
+                             "--vertical-label=Bytes/s",
+                             "--title={}".format(titulo),
+                             "DEF:traficods=contabilidad_{}.rrd:{}:AVERAGE".format(nombre, datasource),
+                             "LINE1:traficods#f9ca24:{}".format(datasource),#paquetes_multicast
+                             )
+
+"""
+"DEF:traficoPaquetesIP=contabilidad.rrd:paquetes_ip:AVERAGE",
+                         "LINE1:traficoPaquetesIP#f0932b:paq_ip",#paquetes_ip
+                         "DEF:traficoMensajesICMP=contabilidad.rrd:mensajes_icmp:AVERAGE",
+                         "LINE1:traficoMensajesICMP#eb4d4b:men_icmp",#mensajes_icmp mandar pings
+                         "DEF:traficoSegmentosTCP=contabilidad.rrd:segmentos_tcp:AVERAGE",
+                         "LINE1:traficoSegmentosTCP#6ab04c:seg_tcp",#segmentos_tcp
+                         "DEF:traficoDatagramas=contabilidad.rrd:datagramas:AVERAGE",
+                         "LINE1:traficoDatagramas#0000FF:datagramas",#datagramas
+"""

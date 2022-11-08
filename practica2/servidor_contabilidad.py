@@ -14,6 +14,7 @@ from datetime import date
 from datetime import datetime
 from operacionesSNMP import snmpget
 from crearRRDs import crear_rrd
+from graficarRRDs import generar_graficas_rrd
 import json
 import os
 import logging
@@ -85,8 +86,6 @@ def listar_agentes():
     :return:
     """
     print("\nAgentes disponibles: ")
-    for agente in diccionario_agentes["agentes"]:
-        print(agente["comunidad"])
     for agente, i in enumerate(diccionario_agentes["agentes"]):
         print(agente, i)
 
@@ -184,6 +183,32 @@ def crear_datetime(str_fecha, str_hora):
     return datetime(anio, mes, dia, horas, minutos)
 
 
+def generar_reporte():
+    listar_agentes()
+    agente_elegido = int(input("\nSelecciona el agente a generar el reporte: "))
+
+    print("Agente seleccionado:")
+    agente_seleccionado = diccionario_agentes["agentes"][agente_elegido]
+
+    fecha_inicio = input('Escribe la fecha de inicio del reporte en formato AAAA-MM-DD: ')
+    hora_inicio = input('Escribe la hora de inicio del reporte en formato HH:MM: ')
+
+    fecha_final = input('Escribe la fecha de fin del reporte en formato AAAA-MM-DD: ')
+    hora_final = input('Escribe la hora de fin del reporte en formato HH:MM: ')
+
+    datetime_inicio = crear_datetime(fecha_inicio, hora_inicio)
+    datetime_final = crear_datetime(fecha_final, hora_final)
+
+    posix_inicio = str(time.mktime(datetime_inicio.timetuple()))[:-2]
+    posix_final = str(time.mktime(datetime_final.timetuple()))[:-2]
+
+    print(posix_inicio, posix_final)
+    # print(str(posix_inicio)[:-2], str(posix_final)[:-2])
+
+    generar_graficas_rrd(posix_inicio, posix_final, agente_seleccionado["comunidad"])
+    print(time.mktime(datetime_final.timetuple()))
+
+
 # imprimir_diccionario(oids)
 inicializar_json()
 print("Practica 2 - Servidor de contabilidad")
@@ -204,8 +229,7 @@ while True:
     elif opcion == 3:
         listar_agentes()
     elif opcion == 4:
-        print('si') # generar_reporte()
-        rrdtool.dump("contabilidad_comunidadASR.rrd", "contabilidad_comunidadASR.xml")
+        generar_reporte()
     elif opcion == 5:
         print('Adios! :)')
         hilo_actualizar_rrds.join()
