@@ -7,14 +7,19 @@ Caleb Salomón Bolaños Ramos - 4CM13 - 2020630043
 """  #
 
 import rrdtool
+import time
 from pysnmp.hlapi import *
+from threading import Thread
 from datetime import date
 from datetime import datetime
 from operacionesSNMP import snmpget
 from crearRRDs import crear_rrd
 import json
 import os
+import logging
 
+logging.basicConfig(level=logging.INFO, format="\n[%(levelname)s] (%(threadName)-s) %(message)s")
+opcion = ''
 
 JSON_INICIAL = """
 {
@@ -25,12 +30,20 @@ JSON_INICIAL = """
 """
 
 #atributos de contabilidad
-atributos_contabilidad = {
+strings_contabilidad = {
     'Paquetes multicast que ha enviado la interfaz de la interfaz de red de un agente': '1.3.6.1.2.1.2.2.1.12.1',
     'Paquetes IP que los protocolos locales (incluyendo ICMP) suministraron a IP en las solicitudes de transmisión.': '1.3.6.1.2.1.4.10.0',
     'Mensajes ICMP que ha recibido el agente': '1.3.6.1.2.1.5.1.0',
     'Número de segmentos TCP transmitidos que contienen uno o más octetos transmitidos previamente': '1.3.6.1.2.1.6.12.0',
     'Datagramas enviados por el dispositivo': '1.3.6.1.2.1.7.4.0'
+}
+
+atributos_contabilidad = {
+    'paquetes_multicast': '1.3.6.1.2.1.2.2.1.12.1',
+    'paquetes_ip': '1.3.6.1.2.1.4.10.0',
+    'mensajes_icmp': '1.3.6.1.2.1.5.1.0',
+    'segmentos_tcp': '1.3.6.1.2.1.6.12.0',
+    'datagramas': '1.3.6.1.2.1.7.4.0'
 }
 
 
@@ -42,8 +55,7 @@ def inicializar_json():
     :return:
     """
     global diccionario_agentes
-    # falta ir actualizando agentes existentes aqui (hilo)
-
+    global hilo_actualizar_rrds
     try:
         with open("agentes.json", "r") as archivo:
             diccionario_agentes = json.load(archivo)
@@ -51,6 +63,9 @@ def inicializar_json():
     except IOError:
         print('Archivo agentes.json no encontrado, se creara uno nuevo.')
         diccionario_agentes = json.loads(JSON_INICIAL)
+
+    hilo_actualizar_rrds = Thread(target=actualizar_rrds)
+    hilo_actualizar_rrds.start()
 
 
 def guardar_cambios():
@@ -70,6 +85,8 @@ def listar_agentes():
     :return:
     """
     print("\nAgentes disponibles: ")
+    for agente in diccionario_agentes["agentes"]:
+        print(agente["comunidad"])
     for agente, i in enumerate(diccionario_agentes["agentes"]):
         print(agente, i)
 
@@ -129,6 +146,21 @@ def imprimir_menu():
     print("5. Salir")
 
 
+def actualizar_rrds():
+    valor_datasource = 0
+    while opcion != 5:
+
+        for agente in diccionario_agentes["agentes"]:
+            valor = "N"
+            for datasource, oid in atributos_contabilidad.items():
+                valor_datasource = int(snmpget(agente["comunidad"], agente["ip"], oid))
+
+                valor += ":" + str(valor_datasource)
+
+            logging.info(agente["comunidad"] + " " + valor)
+            rrdtool.update("contabilidad_{}.rrd".format(agente["comunidad"]), valor)
+        time.sleep(1 * 60)
+
 def calcular_bloque_ejercicio(fecha_nacimiento):
     fecha_actual = date(2022, 10, 27)
 
@@ -160,7 +192,6 @@ print("Usando contabilidad del bloque " + str(calcular_bloque_ejercicio(date(200
 
 while True:
     imprimir_menu()
-    opcion = ''
     try:
         opcion = int(input('\nIngresa una opción: '))
     except:
@@ -174,8 +205,10 @@ while True:
         listar_agentes()
     elif opcion == 4:
         print('si') # generar_reporte()
+        rrdtool.dump("contabilidad_comunidadASR.rrd", "contabilidad_comunidadASR.xml")
     elif opcion == 5:
         print('Adios! :)')
+        hilo_actualizar_rrds.join()
         exit()
     else:
         print('Opcion invalida. Introduce un número del 1 al 5.')

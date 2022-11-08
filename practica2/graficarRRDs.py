@@ -1,13 +1,13 @@
 import sys
 import rrdtool
 import time
-rrdtool.dump("contabilidad.rrd", "contabilidad.xml")
+rrdtool.dump("contabilidad_comunidadASR.rrd", "contabilidad_comunidadASR.xml")
 tiempo_actual = int(time.time())
 #Grafica desde el tiempo actual menos diez minutos
 tiempo_inicial = tiempo_actual - (60*20)
 
 #separar cada datasorce para hacer su propia grafica
-ret = rrdtool.graphv( "contabilidad.png",
+ret = rrdtool.graphv( "contabilidad_comunidadASR.png",
                      "--start",str(tiempo_inicial),
                      "--end",str(tiempo_actual),
                      "--vertical-label=Bytes/s",
