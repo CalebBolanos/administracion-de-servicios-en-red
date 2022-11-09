@@ -3,6 +3,10 @@
         {
             "comunidad": "comunidadASR",
             "ip": "localhost"
+        },
+        {
+            "comunidad": "comunidadARM",
+            "ip": "192.168.71.3"
         }
     ]
 }
