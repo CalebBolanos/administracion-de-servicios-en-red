@@ -18,6 +18,7 @@ from graficarRRDs import generar_graficas_rrd
 import json
 import os
 import logging
+from fpdf import FPDF
 
 logging.basicConfig(level=logging.INFO, format="\n[%(levelname)s] (%(threadName)-s) %(message)s")
 opcion = ''
@@ -214,15 +215,39 @@ def generar_reporte():
     # print(str(posix_inicio)[:-2], str(posix_final)[:-2])
 
     generar_graficas_rrd(posix_inicio, posix_final, agente_seleccionado["comunidad"])
-    generar_pdf(agente_seleccionado["comunidad"], posix_inicio, posix_final)
+    generar_pdf(agente_seleccionado["comunidad"], posix_inicio, posix_final, datetime_inicio, datetime_final)
 
 
-def generar_pdf(nombre_agente, fecha_inicio, fecha_fin):
+def generar_pdf(nombre_agente, fecha_inicio, fecha_fin, datetime_inicio, datetime_fin):
     resultado_fetch = rrdtool.fetch("-s", fecha_inicio, "-e", fecha_fin, "contabilidad_{}.rrd".format(nombre_agente), "AVERAGE")
     filas = resultado_fetch[2]
     valores_contabilidad = filas.pop() #ultimo valor censado dentro del rango de la fecha indicada por el usuario
     resultado_atributos_contabilidad = dict(zip(tupla_contabilidad, valores_contabilidad))
     print(resultado_atributos_contabilidad)
+
+    print("Creando reporte de contabilidad (reporte_" + nombre_agente + ".pdf)")
+
+    pdf = FPDF()
+    pdf.add_page()
+
+    # parte de encabezado (Datos de agente)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 6, txt="version: 1", ln=1, align='L')
+    pdf.cell(200, 6, txt="device: {}".format(nombre_agente), ln=1, align='L')
+    pdf.cell(200, 6, txt="date: {}".format(datetime.now()), ln=1, align='L')
+    pdf.cell(200, 6, txt="DefaultProtocol: radius", ln=1, align='L')
+    pdf.cell(200, 10, txt=" ", ln=1, align='L')
+
+    pdf.cell(200, 6, txt="rdate: {} - {}".format(str(datetime_inicio), str(datetime_fin)), ln=1, align='L')
+    # se imprimen los atributos de contabilida con sus respectivas graficas
+    for i, (atributo, valor) in enumerate(resultado_atributos_contabilidad.items()):
+        pdf.cell(200, 6, txt="#{}".format(atributo), ln=1, align='L')
+        pdf.cell(200, 6, txt="{}: {}".format(i+1, valor), ln=1, align='L')
+        pdf.image("{}_{}.png".format(nombre_agente, atributo), w=160, h=63, type='PNG')
+
+    # se genera el pdf
+    pdf.output("reporte_" + nombre_agente + ".pdf")
+    print("reporte_contabilidad_" + nombre_agente + ".pdf creado correctamente")
 
 # imprimir_diccionario(oids)
 inicializar_json()
@@ -252,25 +277,3 @@ while True:
     else:
         print('Opcion invalida. Introduce un número del 1 al 5.')
 
-
-
-
-"""
-comunidad_agente = input("Escribe el nombre de la comunidad del Agente (Elemento de servicio): ")
-ip_agente = input("Escribe la direccion ip del Agente (Elemento de servicio): ")
-
-
-
-crear_rrd(comunidad_agente)
-
-fecha_inicio = input('Escribe la fecha de inicio en formato AAAA-MM-DD: ')
-hora_inicio = input('Escribe la hora de inicio en formato HH:MM: ')
-
-fecha_final = input('Escribe la fecha de fin en formato AAAA-MM-DD: ')
-hora_final = input('Escribe la hora de fin en formato HH:MM: ')
-
-datetime_inicio = crear_datetime(fecha_inicio, hora_inicio)
-datetime_final = crear_datetime(fecha_final, hora_final)
-
-print(datetime_inicio, datetime_final)
-""" #

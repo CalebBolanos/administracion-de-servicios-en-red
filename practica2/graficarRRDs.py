@@ -3,11 +3,11 @@ import rrdtool
 import time
 
 strings_contabilidad = {
-    'paquetes_multicast': 'Paquetes multicast que ha enviado la interfaz de la interfaz de red de un agente',
-    'paquetes_ip': 'Paquetes IP que los protocolos locales (incluyendo ICMP) suministraron a IP en las solicitudes de transmisión.',
-    'mensajes_icmp': 'Mensajes ICMP que ha recibido el agente',
-    'segmentos_tcp': 'Número de segmentos TCP transmitidos que contienen uno o más octetos transmitidos previamente',
-    'datagramas': 'Datagramas enviados por el dispositivo',
+    'paquetes_multicast': 'Paquetes multicast que ha enviado \nla interfaz de la interfaz de red de un agente',
+    'paquetes_ip': 'Paquetes IP que los protocolos locales (incluyendo ICMP)\n suministraron a IP en las solicitudes de transmisión.',
+    'mensajes_icmp': 'Mensajes ICMP que ha \nrecibido el agente',
+    'segmentos_tcp': 'Número de segmentos TCP transmitidos que contienen\n uno o más octetos transmitidos previamente',
+    'datagramas': 'Datagramas enviados por\n el dispositivo',
 }
 
 
@@ -20,7 +20,7 @@ def generar_graficas_rrd(inicio, fin, nombre):
         ret = rrdtool.graphv( "{}_{}.png".format(nombre, datasource),
                              "--start",inicio,
                              "--end",fin,
-                             "--vertical-label=Bytes/s",
+                             "--vertical-label=Cantidad",
                              "--title={}".format(titulo),
                              "DEF:traficods=contabilidad_{}.rrd:{}:AVERAGE".format(nombre, datasource),
                              "LINE1:traficods#f9ca24:{}".format(datasource),#paquetes_multicast
