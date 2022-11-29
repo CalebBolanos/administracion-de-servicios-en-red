@@ -31,7 +31,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.trendGraphDetection (1)">
+  <component name="RunManager" selected="Python.TrendUpdate (1)">
     <configuration name="TrendUpdate (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="practica3" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -160,9 +160,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.trendGraphDetection (1)" />
         <item itemvalue="Python.TrendUpdate (1)" />
         <item itemvalue="Python.trendCreate (1)" />
+        <item itemvalue="Python.trendGraphDetection (1)" />
         <item itemvalue="Python.trendGraphDetection" />
         <item itemvalue="Python.TrendUpdate" />
       </list>
