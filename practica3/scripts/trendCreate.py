@@ -1,5 +1,5 @@
 import rrdtool
-ret = rrdtool.create("/home/caleb/Documentos/GitHub/administracion-de-servicios-en-red/practica3/RRD/trend.rrd",
+ret = rrdtool.create("/home/caleb/Documentos/ejercicios/Introduccion_SNMP-master/6-AdministraciónDeRendimiento/RRD/trend.rrd",
                      "--start",'N',
                      "--step",'60',
                      "DS:CPUload:GAUGE:60:0:100",

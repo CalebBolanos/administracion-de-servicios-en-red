@@ -5,11 +5,11 @@ from email.mime.multipart import MIMEMultipart
 COMMASPACE = ', '
 # Define params
 rrdpath = '/home/caleb/Documentos/GitHub/administracion-de-servicios-en-red/practica3/RRD/'
-imgpath = '/home/caleb/Documentos/GitHub/administracion-de-servicios-en-red/practica3/IMG/'
+imgpath = '/home/caleb/Documentos/ejercicios/Introduccion_SNMP-master/6-AdministraciónDeRendimiento/IMG/'
 fname = 'trend.rrd'
 
 mailsender = "dummycuenta3@gmail.com"
-mailreceip = "dummycuenta3@gmail.com"
+mailreceip = "bolanos.c@hotmail.com"
 mailserver = 'smtp.gmail.com: 587'
 password = 'dvduuffmlhspbmjj'
 
