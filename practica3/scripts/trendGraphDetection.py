@@ -122,7 +122,12 @@ def generarGraficaRED(ultima_lectura):
 
 
 def detectarUmbrales():
+    primer_umbral = False
+    segundo_umbral = False
+    tercer_umbral = False
     while (1):
+
+
         ultima_actualizacion = rrdtool.lastupdate(rrdpath + "trend.rrd")
         timestamp = ultima_actualizacion['date'].timestamp()
         datoCPU = ultima_actualizacion['ds']["CPUload"]
@@ -132,30 +137,34 @@ def detectarUmbrales():
 
         print('N:' + str(datoCPU) + ':' + str(datoRAM) + ':' + str(datoOctetosEntrada) + ':' + str(datoOctetosSalida))
 
-        elementos_sobrecargados = ['CPU', 'RAM', 'RED']
-        if 20 < datoCPU < 60 or 1582764 < datoRAM < 2374147 or 20 < datoOctetosSalida < 50 or 20 < datoOctetosEntrada < 50:
-            cadena = "Sobrepasa primer umbral (Umbral operativo)"
+        elementos_sobrecargados = ['CPU']#, 'RAM', 'RED']
+        if 20 < datoCPU < 60 and not primer_umbral: #or 1582764 < datoRAM < 2374147 or 20 < datoOctetosSalida < 50 or 20 < datoOctetosEntrada < 50:
+            primer_umbral = True
+            cadena = "Sobrepasa primer umbral (Umbral operativo) - Bolaños Ramos"
             generarGraficaCPU(int(timestamp))
             generarGraficaRAM(int(timestamp))
             generarGraficaRED(int(timestamp))
             send_alert_attached(cadena, elementos_sobrecargados)
             print(cadena)
 
-        if 60 < datoCPU < 85 or 2374147 < datoRAM < 3363375 or 50 < datoOctetosSalida < 90 or 50 < datoOctetosEntrada < 90:
-            cadena = "Sobrepasa segundo umbral (Umbral Sobrecarga)"
-            generarGraficaCPU(int(timestamp))
-            generarGraficaRAM(int(timestamp))
-            generarGraficaRED(int(timestamp))
-            send_alert_attached(cadena, elementos_sobrecargados)
-            print(cadena)
 
-        if datoCPU > 65 or datoRAM > 3363375 or datoOctetosSalida > 90 or datoOctetosEntrada > 90:
-            cadena = "Sobrepasa tercer umbral (Umbral Carga excesiva)"
+        if 60 < datoCPU < 85 and not segundo_umbral: # or 2374147 < datoRAM < 3363375 or 50 < datoOctetosSalida < 90 or 50 < datoOctetosEntrada < 90:
+            cadena = "Sobrepasa segundo umbral (Umbral Sobrecarga) - Bolaños Ramos"
             generarGraficaCPU(int(timestamp))
             generarGraficaRAM(int(timestamp))
             generarGraficaRED(int(timestamp))
             send_alert_attached(cadena, elementos_sobrecargados)
             print(cadena)
+            segundo_umbral = True
+
+        if datoCPU > 65 and not tercer_umbral: # or datoRAM > 3363375 or datoOctetosSalida > 90 or datoOctetosEntrada > 90:
+            cadena = "Sobrepasa tercer umbral (Umbral Carga excesiva) - Bolaños Ramos"
+            generarGraficaCPU(int(timestamp))
+            generarGraficaRAM(int(timestamp))
+            generarGraficaRED(int(timestamp))
+            send_alert_attached(cadena, elementos_sobrecargados)
+            print(cadena)
+            tercer_umbral = True
 
 
         time.sleep(20)

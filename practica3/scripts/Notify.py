@@ -9,7 +9,7 @@ imgpath = '/home/caleb/Documentos/GitHub/administracion-de-servicios-en-red/prac
 fname = 'trend.rrd'
 
 mailsender = "dummycuenta3@gmail.com"
-mailreceip = "bolanos.c@hotmail.com"
+mailreceip = "dummycuenta3@gmail.com" #"bolanos.c@hotmail.com"
 mailserver = 'smtp.gmail.com: 587'
 password = 'dvduuffmlhspbmjj'
 
