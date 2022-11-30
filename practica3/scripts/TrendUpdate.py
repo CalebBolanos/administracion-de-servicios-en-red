@@ -23,31 +23,31 @@ oids_octetos_salida= {
 }
 
 
-while 1:
-    #carga de cpu
-    suma = 0
-    for cpu in oids_cpu:
-        suma += int(consultaSNMP('comunidadASR','localhost',oids_cpu[cpu]))
+def actualizarDatos():
+    while 1:
+        #carga de cpu
+        suma = 0
+        for cpu in oids_cpu:
+            suma += int(consultaSNMP('comunidadASR','localhost',oids_cpu[cpu]))
 
-    carga_cpu = (suma)/len(oids_cpu)
+        carga_cpu = (suma)/len(oids_cpu)
 
-    #carga de ram en kb
-    carga_ram = int(consultaSNMP('comunidadASR','localhost', oid_ram_total)) - int(consultaSNMP('comunidadASR','localhost', oid_ram_libre))
+        #carga de ram en kb
+        carga_ram = int(consultaSNMP('comunidadASR','localhost', oid_ram_total)) - int(consultaSNMP('comunidadASR','localhost', oid_ram_libre))
 
-    #carga de red (total de octetos)
-    suma_red = 0
-    for octetos_in in oids_octetos_entrada:
-        suma_red += int(consultaSNMP('comunidadASR', 'localhost', oids_octetos_entrada[octetos_in]))
-    for octetos_out in oids_octetos_salida:
-        suma_red += int(consultaSNMP('comunidadASR', 'localhost', oids_octetos_salida[octetos_out]))
+        #carga de red (total de octetos)
+        suma_entrada= 0
+        suma_salida = 0
+        for octetos_in in oids_octetos_entrada:
+            suma_entrada += int(consultaSNMP('comunidadASR', 'localhost', oids_octetos_entrada[octetos_in]))
+        for octetos_out in oids_octetos_salida:
+            suma_salida += int(consultaSNMP('comunidadASR', 'localhost', oids_octetos_salida[octetos_out]))
 
-    carga_red = suma_red
+        valor = "N:" + str(carga_cpu) + ":" + str(carga_ram) + ":" + str(suma_entrada/1000000)+ ":" + str(suma_salida/1000000)
+        #print(valor)
+        rrdtool.update(rrdpath+'trend.rrd', valor)
+        time.sleep(5)
 
-    valor = "N:" + str(carga_cpu) + ":" + str(carga_ram) + ":" + str(carga_red)
-    print(valor)
-    rrdtool.update(rrdpath+'trend.rrd', valor)
-    time.sleep(5)
-
-if ret:
-    print (rrdtool.error())
-    time.sleep(300)
+    if ret:
+        print (rrdtool.error())
+        time.sleep(300)

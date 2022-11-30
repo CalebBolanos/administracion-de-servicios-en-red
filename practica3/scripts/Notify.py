@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 COMMASPACE = ', '
 # Define params
 rrdpath = '/home/caleb/Documentos/GitHub/administracion-de-servicios-en-red/practica3/RRD/'
-imgpath = '/home/caleb/Documentos/ejercicios/Introduccion_SNMP-master/6-AdministraciónDeRendimiento/IMG/'
+imgpath = '/home/caleb/Documentos/GitHub/administracion-de-servicios-en-red/practica3/IMG/'
 fname = 'trend.rrd'
 
 mailsender = "dummycuenta3@gmail.com"
@@ -13,17 +13,19 @@ mailreceip = "bolanos.c@hotmail.com"
 mailserver = 'smtp.gmail.com: 587'
 password = 'dvduuffmlhspbmjj'
 
-def send_alert_attached(subject):
+def send_alert_attached(subject, elementos):
     """ Envía un correo electrónico adjuntando la imagen en IMG
     """
     msg = MIMEMultipart()
     msg['Subject'] = subject
     msg['From'] = mailsender
     msg['To'] = mailreceip
-    fp = open(imgpath+'deteccion.png', 'rb')
-    img = MIMEImage(fp.read())
-    fp.close()
-    msg.attach(img)
+    for recurso in elementos:
+        fp = open(imgpath+'deteccion{}.png'.format(recurso), 'rb')
+        img = MIMEImage(fp.read())
+        fp.close()
+        msg.attach(img)
+
     s = smtplib.SMTP(mailserver)
 
     s.starttls()
